@@ -53,21 +53,7 @@ export default class Home extends Vue {
       // this.getDailyDataList()
   }
   getDailyDataList(){
-    console.log(this.identity)
-    // let data: object = {
-    //   timeType: 1,
-    //   dealer: this.identity.dealerId,
-    //   retailer: this.identity.retailerId
-    // }
-    //  this.$https({
-    //     url: "/order/index_order_overview",
-    //     method: "post",
-    //     data:data
-    //   }).then((res:any)=>{
-    //     console.log(res)
-    //     // localStorage.setItem("identity",JSON.stringify(res.data));
-    //     // this.$store.dispatch("aSetIdentity",JSON.stringify(res.data));
-    //   })
+   
   }
 }
 </script>
