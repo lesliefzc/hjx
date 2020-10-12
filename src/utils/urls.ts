@@ -1,4 +1,5 @@
-export const urls: object = {
-    login: "api/login"
+export default{
+    getBaseUrl(){
+        this.$https.get("")
+    }
 }
-export default urls;

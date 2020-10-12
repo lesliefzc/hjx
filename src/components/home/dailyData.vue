@@ -1,9 +1,9 @@
 <template>
   <div class="dailyData">
-     <div class="dataArea">
+     <div class="dataArea ">
         <div >
             <p>订货金额（元）</p>
-            <p>{{orderAmount}}</p>
+            <p class="moneyRed">{{orderAmount}}</p>
         </div>
         <div >
             <p>订货量（笔）</p>
@@ -13,7 +13,7 @@
     <div class="dataArea">
         <div >
             <p>发货金额（元）</p>
-            <p>{{deliveryAmount}}</p>
+            <p class="moneyRed">{{deliveryAmount}}</p>
         </div>
         <div>
             <p>发货量（笔）</p>
@@ -31,20 +31,20 @@ import { Component, Vue } from 'vue-property-decorator';
   },
   props:{
         orderAmount:{
-            type: Number,
-            default: 0
+            type: String,
+            default: "0"
         },
         orderQuantity:{
-            type: Number,
-            default: 0
+            type: String,
+            default: "0"
         },
         deliveryAmount:{
-            type: Number,
-            default: 0
+            type: String,
+            default: "0"
         },
         deliveryQuantity:{
-            type: Number,
-            default: 0
+            type: String,
+            default: "0"
         },
     }
 })
@@ -68,6 +68,9 @@ export default class dailyData extends Vue {
             width: 100%;
             text-align: center;
         }
+    }
+    .moneyRed{
+        color: red;
     }
 }
 </style>

@@ -11,9 +11,16 @@ export interface ResopnseData {
     message: string;
 }
 let service: AxiosInstance | any;
-let that = this;
+var  baseURL = "123" ;
+axios({
+    method: "GET",
+    url: "/baseURL.json"
+}).then((res:any)=>{
+    baseURL = "456"
+    localStorage.setItem("baseUrl",res.data.baseURL)
+})
 service = axios.create({
-    baseURL: '/api',
+    baseURL: localStorage.getItem("baseUrl") as string,
     timeout: 30000,
     headers:{
         'Content-Type': 'application/x-www-form-urlencoded'
