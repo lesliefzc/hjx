@@ -12,3 +12,8 @@ declare module "vue/types/vue"{
     $router: VueRouter
   }
 }
+declare global {
+  interface Window{
+    g: any
+  }
+}

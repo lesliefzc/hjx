@@ -5,22 +5,15 @@ import {Toast} from 'vant'
 import router from '@/router';
 import qs from 'qs'
 Vue.use(Toast)
+
 export interface ResopnseData {
     code: number;
     data?: any;
     message: string;
 }
 let service: AxiosInstance | any;
-var  baseURL = "123" ;
-axios({
-    method: "GET",
-    url: "/baseURL.json"
-}).then((res:any)=>{
-    baseURL = "456"
-    localStorage.setItem("baseUrl",res.data.baseURL)
-})
 service = axios.create({
-    baseURL: localStorage.getItem("baseUrl") as string,
+    baseURL: window.g.baseURL,
     timeout: 30000,
     headers:{
         'Content-Type': 'application/x-www-form-urlencoded'
