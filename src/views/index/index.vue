@@ -16,8 +16,24 @@
           </van-tab>
         </van-tabs>
       </div>
+      <div class="echartsArea">
+        <div class="commonTitle">
+          <p>订货统计</p>
+        </div>
+        <van-tabs v-model="echartsActive" @click="changeOrderStatistics" animated swipeable >
+          <van-tab title="近七天">
+            <div id="myChart1" ></div>
+          </van-tab>
+          <van-tab title="近一个月">
+             <div id="myChart2" ></div>
+          </van-tab>
+          <van-tab title="近三个月">
+             <div id="myChart3" ></div>
+          </van-tab>
+        </van-tabs>
+      </div>
       <div class="activityArea">
-        <div class="acivityTitle">
+        <div class="commonTitle">
           <p>营销活动</p>
           <p>更多</p>
         </div>
@@ -38,6 +54,7 @@ import * as apiUrls from '../../utils/apiUrl'
 import { Component, Vue } from 'vue-property-decorator';
 import { Tab, Tabs ,Swipe, SwipeItem  } from 'vant';
 import dailyData from '../../components/home/dailyData.vue'
+import * as echarts from 'echarts'
 @Component({
   components: {
       [Tab.name]: Tab,
@@ -52,11 +69,16 @@ export default class Home extends Vue {
   private active:number = 0
   private identity:any = {}
   private dailyData:any = {}
-  private timeType: number = 1
+  private timeType: number = 1   //订货金额订货量的时间类型  1 2 3
+  private OrderTimeType: number = 4 //图表时间类型 4 5 6
   private activityList:object[] = []
-
+  private echartsActive: number = 0
+  private xData: string[] = []
+  private YData: number[] = []
   created(){
     this.getDefault()
+  }
+  mounted(){
   }
   async getDefault(){    //获取默认经销商
       if(!this.$store.state.user.userMsg){
@@ -72,6 +94,7 @@ export default class Home extends Vue {
       })
       this.getDailyDataList();
       this.getActivityList();
+      this.changeOrderStatistics(0)
   }
   async getDailyDataList(){    //获取每日/本周/本月的数据
     let data: object = {
@@ -97,7 +120,7 @@ export default class Home extends Vue {
       dealerId: this.identity.dealerId,
       queryNum: 5
     }
-    await this.$https({
+      await this.$https({
         url: apiUrls.activityList,
         method: "post",
         data:data
@@ -106,8 +129,68 @@ export default class Home extends Vue {
       })
   }
   changeTabs(name:number){
+
     this.timeType = name + 1
     this.getDailyDataList()
+  }
+  async getOrderStatistics(){   //获取echarts图表的数据
+    let data: object = {
+      retailer: this.identity.retailerId,
+      dealer: this.identity.dealerId,
+      type: 1,
+      timeType: this.OrderTimeType
+    }
+    this.xData = []
+    this.YData = []
+    await this.$https({
+      url: apiUrls.OrderStatistics,
+      method: "post",
+      data:data
+    }).then((res:any)=>{
+      res.data.forEach((ele:any) => {
+          this.xData.push(ele.date)
+          this.YData.push((ele.amount/100))
+      });
+    })
+  }
+  async changeOrderStatistics(name:number){
+    this.OrderTimeType = name + 4
+    await this.getOrderStatistics();
+    if(name===0){
+      let myChart = echarts.init(document.getElementById("myChart1") as HTMLDivElement)
+      this.drawLine(myChart)
+      // 绘制图表
+    }else if(name===1){
+      let myChart = echarts.init(document.getElementById("myChart2") as HTMLDivElement)
+      this.drawLine(myChart)
+    }else{
+      let myChart = echarts.init(document.getElementById("myChart3") as HTMLDivElement)
+      this.drawLine(myChart)
+    }
+  }
+  async drawLine(myChart:any){
+    // 基于准备好的dom，初始化echarts实例
+    let options = {
+        tooltip: {},
+        xAxis: {
+            data: this.xData
+        },
+        yAxis: {
+          max: Math.max(...this.YData) + 50
+        },
+        series: [{
+            name: '销量',
+            type: 'line',
+            data: this.YData
+        }],
+        grid:{
+          top: 20,
+          left: "15%"
+        }
+      }
+      this.$nextTick(()=>{
+        myChart.setOption(options);
+      })  
   }
 }
 </script>
@@ -131,19 +214,17 @@ export default class Home extends Vue {
     padding: 0 20px;
     font-size: 14px;
   }
-  .dataArea{
-    width: 100%;
-    height: 60px;
-    border: 1px solid #eee;
-    padding: 0 20px;
-    font-size: 14px;
+  .commonTitle{
+    height: 45px;
     display: flex;
-    &>div{
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
-      width: 100%;
-      text-align: center;
+    padding: 0 20px;
+    justify-content: space-between;
+    line-height: 45px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    p:nth-child(2){
+      color: red;
+      
     }
   }
   .activityArea{
@@ -151,18 +232,6 @@ export default class Home extends Vue {
     width: 100%;
     height: 250px;
     margin-top: 20px;
-    .acivityTitle{
-      height: 45px;
-      display: flex;
-      padding: 0 20px;
-      justify-content: space-between;
-      line-height: 45px;
-      border-bottom: 1px solid #eee;
-      p:nth-child(2){
-        color: red;
-        font-size: 14px;
-      }
-    }
     .my-swipe{
       width: 100%;
       height: 205px;
@@ -170,6 +239,15 @@ export default class Home extends Vue {
         width: 100%;
         height: 100%;
       }
+    }
+  }
+  .echartsArea{
+    width: 100%;
+    height: 320px;
+    background: #fff;
+    #myChart1,#myChart2,#myChart3{
+      width: 100%;
+      height:250px;
     }
   }
 }

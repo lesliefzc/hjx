@@ -61,6 +61,7 @@ export default class dailyData extends Vue {
         padding: 0 20px;
         font-size: 14px;
         display: flex;
+        box-sizing: border-box;
         &>div{
         display: flex;
             flex-direction: column;

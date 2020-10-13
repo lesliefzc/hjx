@@ -20,7 +20,7 @@ service = axios.create({
     },
     withCredentials:true,
     transformRequest:[
-        data=>{
+        (data:any)=>{
             return qs.stringify(data)
         }
     ]
@@ -28,6 +28,10 @@ service = axios.create({
 
 service.interceptors.request.use(
     (config:AxiosRequestConfig)=>{
+        Toast.loading({
+            duration: 10000,
+            loadingType: "circular",
+        })
         let token =window.localStorage.getItem('token')
         if(token) {
             config.headers.common['TOKEN'] = token
@@ -42,6 +46,7 @@ service.interceptors.request.use(
 )
 service.interceptors.response.use(
     (res:AxiosResponse)=>{
+        Toast.clear()
         if(res.status === 200){
             const data : any = res.data;
             if(data.code === 200){
