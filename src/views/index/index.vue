@@ -1,5 +1,24 @@
 <template>
     <div class="indexClass">
+      <van-nav-bar
+        :left-text="'好经销-'+identity.dealerName" 
+        :fixed="true"
+        :placeholder="true"
+      />
+      <div class="orderStatus">
+        <div>
+          <p>待确认订单</p>
+          <p>{{orderRise.unconfirmedOrder}}</p>
+        </div>
+        <div>
+          <p>待审核订单</p>
+          <p>{{orderRise.nauditedOrder}}</p>
+        </div>
+        <div>
+          <p>待发货订单</p>
+          <p>{{orderRise.unshippedOrder}}</p>
+        </div>
+      </div>
       <div class="dailyData">
         <div class="cell">
           <p>业务概览</p>
@@ -46,14 +65,27 @@
           </van-swipe>
         </div>
       </div>
+      <div class="goodsRecommend">
+        <div class="commonTitle">
+          <p>倾心推荐</p>
+        </div>
+        <goodsList :dataList="goodsRecommendList"></goodsList>
+      </div>
+      <div class="goodsRecommend">
+        <div class="commonTitle">
+          <p>新品推荐</p>
+        </div>
+        <goodsList :dataList="newRecommendList"></goodsList>
+      </div>
     </div>
 </template>
 <script lang="ts">
 declare function require(img: string): string
 import * as apiUrls from '../../utils/apiUrl'
 import { Component, Vue } from 'vue-property-decorator';
-import { Tab, Tabs ,Swipe, SwipeItem  } from 'vant';
+import { Tab, Tabs ,Swipe, SwipeItem ,NavBar } from 'vant';
 import dailyData from '../../components/home/dailyData.vue'
+import goodsList from '../../components/home/goodsList.vue'
 import * as echarts from 'echarts'
 @Component({
   components: {
@@ -61,7 +93,9 @@ import * as echarts from 'echarts'
       [Tabs.name]: Tabs,
       [Swipe.name]: Swipe,
       [SwipeItem.name]: SwipeItem,
-      "dailyData": dailyData
+      [NavBar.name]: NavBar,
+      "dailyData": dailyData,
+      "goodsList": goodsList
   },
 })
 
@@ -75,6 +109,10 @@ export default class Home extends Vue {
   private echartsActive: number = 0
   private xData: string[] = []
   private YData: number[] = []
+  private goodsRecommendList: object[] = []    //商品推荐列表
+  private newRecommendList: object[] = []    //新品推荐列表
+  private orderRise: any = {}    //新品推荐列表
+
   created(){
     this.getDefault()
   }
@@ -88,13 +126,20 @@ export default class Home extends Vue {
         url: apiUrls.defaultDealer,
         method: "post"
       }).then((res:any)=>{
-        localStorage.setItem("identity",JSON.stringify(res.data));
-        this.$store.dispatch("aSetIdentity",JSON.stringify(res.data));
-        this.identity = res.data
+        if(!!res){
+          localStorage.setItem("identity",JSON.stringify(res.data));
+          this.$store.dispatch("aSetIdentity",JSON.stringify(res.data));
+          this.identity = res.data;
+          this.getOrderRise();
+          this.getDailyDataList();
+          this.getActivityList();
+          this.goodsRecommend();
+          this.newRecommend();
+          this.changeOrderStatistics(0);
+        }
+        
       })
-      this.getDailyDataList();
-      this.getActivityList();
-      this.changeOrderStatistics(0)
+   
   }
   async getDailyDataList(){    //获取每日/本周/本月的数据
     let data: object = {
@@ -114,6 +159,20 @@ export default class Home extends Vue {
         this.dailyData = res.data
       })
   }
+  async getOrderRise(){    //获取订单状态
+    let data: object = {
+      dealer: this.identity.dealerId,
+      retailer: this.identity.retailerId
+    }
+    this.$https({
+      url: apiUrls.orderRise,
+      method: "post",
+      data:data
+    }).then((res:any)=>{
+      this.orderRise = res.data
+    })
+  }
+
   async getActivityList(){    //获取活动列表
     let data: object = {
       retailerRelationId: this.identity.retailerRelationId,
@@ -153,7 +212,34 @@ export default class Home extends Vue {
       });
     })
   }
-  async changeOrderStatistics(name:number){
+  async goodsRecommend(){    //商品推荐列表
+    let data: object = {
+      retailerRelationId: this.identity.retailerRelationId,
+      dealerId: this.identity.dealerId,
+    }
+    await this.$https({
+      url: apiUrls.goodsRecommend,
+      method: "post",
+      data:data
+    }).then((res:any)=>{
+      this.goodsRecommendList = res.data
+    })
+  }
+  async newRecommend(){    //商品推荐列表
+    let data: object = {
+      retailerRelationId: this.identity.retailerRelationId,
+      dealerId: this.identity.dealerId,
+    }
+    await this.$https({
+      url: apiUrls.newRecommend,
+      method: "post",
+      data:data
+    }).then((res:any)=>{
+      this.newRecommendList = res.data
+    })
+  }
+  
+  async changeOrderStatistics(name:number){   //图表切换时触发的函数
     this.OrderTimeType = name + 4
     await this.getOrderStatistics();
     if(name===0){
@@ -197,8 +283,40 @@ export default class Home extends Vue {
 <style lang="scss" scoped>
 .indexClass{
   width: 100%;
-  height: 100%;
+  height: auto;
   background: #eee;
+  padding-bottom: 20px;
+  .orderStatus{
+    width: 100%;
+    height: 80px;
+    background: #fff;
+    margin-bottom: 20px;
+    display: flex;
+    &>div:nth-of-type(1){
+      background: url("../../assets/images/home/bg1.png");
+      background-size: 100% 100%;
+    }
+    &>div:nth-of-type(2){
+      background: url("../../assets/images/home/bg2.png");
+      background-size: 100% 100%;
+    }
+    &>div:nth-of-type(3){
+      background: url("../../assets/images/home/bg3.png");
+      background-size: 100% 100%;
+    }
+    &>div{
+      color: #fff;
+      line-height: 25px;
+      font-size: 14px;
+      width: 33.33%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      
+    }
+    
+  }
   .dailyData{
     background: #fff;
     width: 100%;
@@ -245,10 +363,18 @@ export default class Home extends Vue {
     width: 100%;
     height: 320px;
     background: #fff;
+    margin-top: 20px;
     #myChart1,#myChart2,#myChart3{
       width: 100%;
       height:250px;
     }
+  }
+  .goodsRecommend{
+    margin-top: 20px;
+    width: 100%;
+    height: auto;
+    background: #fff;
+  
   }
 }
 </style>
