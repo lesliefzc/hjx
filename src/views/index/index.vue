@@ -52,7 +52,7 @@
           </van-tab>
         </van-tabs>
       </div>
-      <div class="activityArea">
+      <div class="activityArea" v-if="activityList.length!==0">
         <div class="commonTitle">
           <p>营销活动</p>
           <p>更多</p>
@@ -66,13 +66,13 @@
           </van-swipe>
         </div>
       </div>
-      <div class="goodsRecommend">
+      <div class="goodsRecommend"  v-if="goodsRecommendList.length!==0">
         <div class="commonTitle">
           <p>倾心推荐</p>
         </div>
         <goodsList :dataList="goodsRecommendList"></goodsList>
       </div>
-      <div class="goodsRecommend">
+      <div class="goodsRecommend" v-if="newRecommendList.length!==0">
         <div class="commonTitle">
           <p>新品推荐</p>
         </div>
@@ -81,11 +81,11 @@
       <van-popup v-model="selectDefaultShow" position="bottom" style="height:90%;">
         <div class="selectList">
           <div class="selectItem" style="height:100px;" v-for="(item,index) in retailerList" :key="index">
-              <div>{{item.dealerName}}</div>
-              <!-- <div >
+              <div>{{userMsg.orgType === 2?item.retailerName:item.dealerName}}</div>
+              <div >
                 <p  >{{userMsg.orgType === 2?'下单时间：':'上次下单'}}</p>
                 <p  >{{item.submitTime}}</p>
-              </div> -->
+              </div>
           </div>
         </div>
       </van-popup>
@@ -100,6 +100,7 @@ import dailyData from '../../components/home/dailyData.vue'
 import goodsList from '../../components/home/goodsList.vue'
 import * as echarts from 'echarts'
 import  axios from 'axios'
+import * as utils from '../../utils/utils'
 @Component({
   components: {
       [Tab.name]: Tab,
@@ -133,6 +134,7 @@ export default class Index extends Vue {
     this.getDefault()
   }
   mounted(){
+    console.log(utils.timestampToTime(new Date().getTime(),true));
   }
   async getDefault(){    //获取默认经销商
       if(!!this.$store.state.user.userMsg.__ob__){
@@ -170,6 +172,9 @@ export default class Index extends Vue {
       method: "post",
       data: data
     }).then((res:any)=>{
+      res.data.data.forEach((ele:any) => {
+        ele.submitTime = ele.submitTime!==null?utils.timestampToTime(ele.submitTime,true):"";
+      });
       this.retailerList = res.data.data
     })
   }

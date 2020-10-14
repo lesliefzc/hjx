@@ -111,6 +111,7 @@ module.exports = {
       // proxy all requests starting with /api to jsonplaceholder
       "/api": {
         target: "http://www.topzh.net:16350",
+        // target: "http://app.haojingxiao.com",
         changeOrigin: true,
         pathRewrite: {
           "^/api": "/"
