@@ -25,7 +25,6 @@ service = axios.create({
         }
     ]
 })
-
 service.interceptors.request.use(
     (config:AxiosRequestConfig)=>{
         Toast.loading({

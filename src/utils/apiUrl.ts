@@ -6,3 +6,4 @@ export  const OrderStatistics: string ="/order/index_product_statistics" //获�
 export  const goodsRecommend: string ="/api/index/recommend/list"   //商品推荐列表
 export  const newRecommend: string ="/api/index/new/list"   //新品推荐列表
 export  const orderRise: string ="/order/index_order_rise"   //首页订单状态
+export  const selectRetailerList: string ="/api/index/select/list"   //零售商列表

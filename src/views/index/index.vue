@@ -1,9 +1,10 @@
 <template>
     <div class="indexClass">
       <van-nav-bar
-        :left-text="'好经销-'+identity.dealerName" 
+        :left-text="'好经销-'+(userMsg.orgType===3?identity.dealerName:identity.retailerName)" 
         :fixed="true"
         :placeholder="true"
+        @click-left="selectDefault"
       />
       <div class="orderStatus">
         <div>
@@ -77,16 +78,28 @@
         </div>
         <goodsList :dataList="newRecommendList"></goodsList>
       </div>
+      <van-popup v-model="selectDefaultShow" position="bottom" style="height:90%;">
+        <div class="selectList">
+          <div class="selectItem" style="height:100px;" v-for="(item,index) in retailerList" :key="index">
+              <div>{{item.dealerName}}</div>
+              <!-- <div >
+                <p  >{{userMsg.orgType === 2?'下单时间：':'上次下单'}}</p>
+                <p  >{{item.submitTime}}</p>
+              </div> -->
+          </div>
+        </div>
+      </van-popup>
     </div>
 </template>
 <script lang="ts">
 declare function require(img: string): string
 import * as apiUrls from '../../utils/apiUrl'
 import { Component, Vue } from 'vue-property-decorator';
-import { Tab, Tabs ,Swipe, SwipeItem ,NavBar } from 'vant';
+import { Tab, Tabs ,Swipe, SwipeItem ,NavBar ,Popup } from 'vant';
 import dailyData from '../../components/home/dailyData.vue'
 import goodsList from '../../components/home/goodsList.vue'
 import * as echarts from 'echarts'
+import  axios from 'axios'
 @Component({
   components: {
       [Tab.name]: Tab,
@@ -94,12 +107,13 @@ import * as echarts from 'echarts'
       [Swipe.name]: Swipe,
       [SwipeItem.name]: SwipeItem,
       [NavBar.name]: NavBar,
+      [Popup.name]: Popup,
       "dailyData": dailyData,
       "goodsList": goodsList
   },
 })
 
-export default class Home extends Vue {
+export default class Index extends Vue {
   private active:number = 0
   private identity:any = {}
   private dailyData:any = {}
@@ -112,21 +126,24 @@ export default class Home extends Vue {
   private goodsRecommendList: object[] = []    //商品推荐列表
   private newRecommendList: object[] = []    //新品推荐列表
   private orderRise: any = {}    //新品推荐列表
-
+  private selectDefaultShow: boolean = false
+  private userMsg: object = {}
+  private retailerList: object[] = []
   created(){
     this.getDefault()
   }
   mounted(){
   }
   async getDefault(){    //获取默认经销商
-      if(!this.$store.state.user.userMsg){
+      if(!!this.$store.state.user.userMsg.__ob__){
         this.$store.dispatch("aSetUserMsg",localStorage.getItem("userMsg"));
       }
+      this.userMsg = JSON.parse(this.$store.state.user.userMsg)
       await this.$https({
         url: apiUrls.defaultDealer,
         method: "post"
       }).then((res:any)=>{
-        if(!!res){
+        if(res.code === 200){
           localStorage.setItem("identity",JSON.stringify(res.data));
           this.$store.dispatch("aSetIdentity",JSON.stringify(res.data));
           this.identity = res.data;
@@ -139,7 +156,22 @@ export default class Home extends Vue {
         }
         
       })
-   
+  }
+  async selectDefault(){//选择零售商门店
+    this.selectDefaultShow = true;
+    let data: object = {
+      dealerName: "",
+      retailerRelationName: "",
+      shippingroute: "",
+      userId: this.identity.userId
+    }
+    axios({
+      url: window.g.baseURL+apiUrls.selectRetailerList,
+      method: "post",
+      data: data
+    }).then((res:any)=>{
+      this.retailerList = res.data.data
+    })
   }
   async getDailyDataList(){    //获取每日/本周/本月的数据
     let data: object = {
@@ -286,6 +318,9 @@ export default class Home extends Vue {
   height: auto;
   background: #eee;
   padding-bottom: 20px;
+  /deep/.van-nav-bar--fixed{
+    z-index: 999;
+  }
   .orderStatus{
     width: 100%;
     height: 80px;
