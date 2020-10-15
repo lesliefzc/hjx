@@ -7,3 +7,23 @@ export  const goodsRecommend: string ="/api/index/recommend/list"   //商品推�
 export  const newRecommend: string ="/api/index/new/list"   //新品推荐列表
 export  const orderRise: string ="/order/index_order_rise"   //首页订单状态
 export  const selectRetailerList: string ="/api/index/select/list"   //零售商列表
+export  const ModifyRetailerList: string ="/api/index/select/modify"   //改变零售商
+export  const categoryList: string ="/api/goods/category"   //种类列表
+export  const brandList: string ="/api/goods/brand"   //品牌列表
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export  const loginOut: string ="/logout"   //退出登录

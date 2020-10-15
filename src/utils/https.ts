@@ -3,6 +3,7 @@ import VueRouter, { Route } from "vue-router";
 import Vue from 'vue'
 import {Toast} from 'vant'
 import router from '@/router';
+import store from '@/store'
 import qs from 'qs'
 Vue.use(Toast)
 
@@ -51,6 +52,9 @@ service.interceptors.response.use(
             if(data.code === 200){
                 return data;
             }else if( data.code === 401){
+                localStorage.clear()
+                store.dispatch("aSetUserMsg","")
+                store.dispatch("aSetIdentity","")
                 Toast.fail(data.msg);
                 setTimeout(() => {
                     router.push({

@@ -80,10 +80,13 @@
       </div>
       <van-popup v-model="selectDefaultShow" position="bottom" style="height:90%;">
         <div class="selectList">
-          <div class="selectItem" style="height:100px;" v-for="(item,index) in retailerList" :key="index">
-              <div>{{userMsg.orgType === 2?item.retailerName:item.dealerName}}</div>
-              <div >
-                <p  >{{userMsg.orgType === 2?'下单时间：':'上次下单'}}</p>
+          <div class="selectItems" v-for="(item,index) in retailerList" :key="index" @click="modifyDefault(item)">
+              <div class="selectItem">
+                <p>{{userMsg.orgType === 2?"零售商名称：":"经销商名称："}}</p>
+                <p>{{userMsg.orgType === 2?item.retailerName:item.dealerName}}</p>
+              </div>
+              <div class="selectItem">
+                <p  >{{userMsg.orgType === 2?'下单时间：':'上次下单：'}}</p>
                 <p  >{{item.submitTime}}</p>
               </div>
           </div>
@@ -134,7 +137,6 @@ export default class Index extends Vue {
     this.getDefault()
   }
   mounted(){
-    console.log(utils.timestampToTime(new Date().getTime(),true));
   }
   async getDefault(){    //获取默认经销商
       if(!!this.$store.state.user.userMsg.__ob__){
@@ -158,6 +160,27 @@ export default class Index extends Vue {
         }
         
       })
+  }
+  async modifyDefault(item:any){    //改变选择零售商门店
+    let data: object = {
+      dealerId: item.dealerId,
+      dealerName: item.dealerName,
+      retailerId: item.retailerId,
+      retailerName: item.retailerName,
+      retailerRelationId: item.retailerRelationId,
+      userId: item.userId,
+    }
+    axios({
+      url: window.g.baseURL+apiUrls.ModifyRetailerList,
+      method: "post",
+      data: data
+    }).then((res:any)=>{
+      if(res.data.code === 200){
+        this.selectDefaultShow = false;
+        this.getDefault();
+      }
+    })
+
   }
   async selectDefault(){//选择零售商门店
     this.selectDefaultShow = true;
@@ -415,6 +438,27 @@ export default class Index extends Vue {
     height: auto;
     background: #fff;
   
+  }
+  .selectList{
+    .selectItems{
+      width: 100%;
+      height: 80px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      color: #000;
+      font-size: 15px;
+      .selectItem{
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        &>p:first-child{
+          font-weight: 600;
+        }
+      }
+    }
+    
   }
 }
 </style>
