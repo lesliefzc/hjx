@@ -1,9 +1,8 @@
 <template>
     <div class="indexClass">
       <van-nav-bar
+        style=""
         :left-text="'好经销-'+(userMsg.orgType===3?identity.dealerName:identity.retailerName)" 
-        :fixed="true"
-        :placeholder="true"
         @click-left="selectDefault"
       />
       <div class="orderStatus">
@@ -342,6 +341,7 @@ export default class Index extends Vue {
 </script>
 <style lang="scss" scoped>
 .indexClass{
+  position: relative;
   width: 100%;
   height: auto;
   background: #eee;

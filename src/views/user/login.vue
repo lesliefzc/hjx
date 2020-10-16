@@ -4,7 +4,7 @@
       <div class="inputArea">
         <div class="inputItem">
             <div class="title">账号</div>
-            <input type="text" placeholder="请输入账号" v-model="userForm.username">
+            <input type="text" placeholder="请输入账号" maxlength="11" v-model="userForm.username">
         </div>
         <div class="inputItem">
             <div class="title">密码</div>

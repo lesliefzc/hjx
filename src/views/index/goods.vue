@@ -1,25 +1,23 @@
 <template>
-    <div class="goods" ref="goods">
-       <van-nav-bar :placeholder="true" ref="navbar" :fixed="true" title="商品分类" />
+    <div class="goods" >
        <div class="search" >
+        <van-nav-bar :placeholder="true"   title="商品分类" />
            <van-search
                 v-model="searchValue"
                 shape="round"
                 placeholder="请输入搜索关键词"
                 show-action
-                style="position:fixed;top:46px;left:0;right:0;"
-                ref="search"
             >
                 <template #action>
                     <div>搜索</div>
                 </template>
             </van-search>
         </div>
-        <div class="goodsArea" style="margin-top: 54px;">
-            <div class="slider" :style="{height: contentHeight+'px'}">
+        <div class="goodsArea" >
+            <div class="slider" >
                 <div v-for="(item,index) in categoryList" :key="index" :class="{'active': active === index}"  :data-id="index" @click="changeCategory(item,index)">{{item.name}}</div>
             </div>
-            <div class="categoryArea" :style="{height: contentHeight+'px'}">
+            <div class="categoryArea" >
                 <div class="categoryTop">
                     <img :src="'http://www.topzh.net:16350/' + currentCategory.img" alt="">
                 </div>
@@ -48,7 +46,6 @@ import noData from '../../components/common/noData.vue'
     [NavBar.name]: NavBar,
     [Search.name]: Search,
     [Divider.name]: Divider,
-    [Toast.name]: Toast,
     "noData": noData
   },
 })
@@ -64,10 +61,6 @@ export default class goods extends Vue {
     mounted(){
         this.identity = JSON.parse(localStorage.getItem("identity") as string);
         this.getCategoryList()
-        this.$nextTick(()=>{
-            let el :any= this.$refs as any
-            this.contentHeight = el.goods.offsetHeight-el.search.offsetHeight-el.navbar.$el.offsetHeight
-        })
     }
     created(){
        
@@ -117,6 +110,11 @@ export default class goods extends Vue {
 .goods{
     width: 100%;
     height: 100%;
+    position: relative;
+    .search{
+        position: sticky;
+        top: 0;
+    }
     .goodsArea{
         display: flex;
         .slider{

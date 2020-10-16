@@ -13,3 +13,8 @@ html {overflow-y: scroll;}
 /* css common */
 .clearfix:after {content: "."; display: block; height:0; clear:both; visibility: hidden;}
 .clearfix { *zoom:1; }
+/deep/.van-nav-bar{
+    position:sticky !important;
+    top:0;
+    z-index:99;
+}

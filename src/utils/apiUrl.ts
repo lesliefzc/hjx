@@ -10,6 +10,7 @@ export  const selectRetailerList: string ="/api/index/select/list"   //零售商
 export  const ModifyRetailerList: string ="/api/index/select/modify"   //改变零售商
 export  const categoryList: string ="/api/goods/category"   //种类列表
 export  const brandList: string ="/api/goods/brand"   //品牌列表
+export  const goodsList: string ="/api/goods/goods/search"   //品牌列表
 
 
 

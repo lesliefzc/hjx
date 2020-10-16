@@ -20,6 +20,7 @@ export default Vue.extend({
 </script>
 <style lang="scss">
 @import url('./assets/scss/app/index.scss');
+@import url('./assets/scss/app/vantModify.scss');
 #app{
   width: 100%;
   height: 100%;
@@ -37,4 +38,5 @@ body{
   margin: 0;
   padding: 0;
 }
+
 </style>

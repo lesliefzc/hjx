@@ -102,13 +102,13 @@ module.exports = {
   // webpack-dev-server 相关配置
   devServer: {
     open: process.platform === "darwin",
-    host: "192.168.0.105",
+    host: "192.168.1.56",
     port: 8081, //8080,
     https: false,
     hotOnly: false,
     proxy: {
       // 设置代理
-      // proxy all requests starting with /api to jsonplaceholder
+      //proxy all requests starting with /api to jsonplaceholder
       "/api": {
         target: "http://www.topzh.net:16350",
         // target: "http://app.haojingxiao.com",
