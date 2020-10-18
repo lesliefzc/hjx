@@ -3,22 +3,21 @@
     <div :style="{'height':routerViewHeight+'px','overflow':'scroll'}">
       <router-view />
     </div>
-      <van-tabbar ref="tabbar" :fixed="false" :placeholder="true" :safe-area-inset-bottom="true" v-model="active">
-          <van-tabbar-item icon="home-o" replace to="/home">首页</van-tabbar-item>
-          <van-tabbar-item icon="goods-collect-o"  replace to="/goods">商品</van-tabbar-item>
-          <van-tabbar-item icon="friends-o"  replace to="/dynamicSales">动销</van-tabbar-item>
-          <van-tabbar-item icon="shopping-cart-o"  replace to="/car">购物车</van-tabbar-item>
-          <van-tabbar-item icon="setting-o" replace to="/templateOrder">模板下单</van-tabbar-item>
-          <van-tabbar-item icon="manager-o" replace to="/account">我的</van-tabbar-item>
+      <van-tabbar route ref="tabbar" :fixed="false" :placeholder="true" :safe-area-inset-bottom="true" v-model="active">
+          <van-tabbar-item icon="home-o" :to="{name:'home',query:{height: routerViewHeight}}" >首页</van-tabbar-item>
+          <van-tabbar-item icon="goods-collect-o"   :to="{name:'goods',query:{height: routerViewHeight}}"  >商品</van-tabbar-item>
+          <van-tabbar-item icon="friends-o"   to="/dynamicSales">动销</van-tabbar-item>
+          <van-tabbar-item icon="shopping-cart-o"   to="/car">购物车</van-tabbar-item>
+          <van-tabbar-item icon="setting-o"  to="/templateOrder">模板下单</van-tabbar-item>
+          <van-tabbar-item icon="manager-o"  to="/account">我的</van-tabbar-item>
       </van-tabbar>
   </div>
 </template>
 <script lang="ts">
-
-import {Tabbar,TabbarItem} from 'vant'
 declare function require(img: string): string
 import * as apiUrls from '../../utils/apiUrl'
 import { Component, Vue } from 'vue-property-decorator';
+import {Tabbar,TabbarItem} from 'vant'
 @Component({
   components: {
     [Tabbar.name]: Tabbar,
@@ -30,8 +29,10 @@ export default class Home extends Vue {
    private authorityKeyList:any[] = []
    private routerViewHeight:number = 0
    mounted(){
-     let el: any = this.$refs.tabbar as any
-     this.routerViewHeight = document.documentElement.offsetHeight - el.$el.offsetHeight ;
+      let el: any = this.$refs.tabbar as any
+      this.$nextTick(()=>[
+      this.routerViewHeight = document.documentElement.offsetHeight - el.$el.offsetHeight
+    ])
    }
 
 }

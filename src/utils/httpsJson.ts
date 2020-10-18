@@ -12,21 +12,16 @@ export interface ResopnseData {
     data?: any;
     message: string;
 }
-let service: AxiosInstance | any;
-service = axios.create({
+let serviceJson: AxiosInstance | any;
+serviceJson = axios.create({
     baseURL: 'http://www.topzh.net:16350',
     timeout: 30000,
     headers:{
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
     },
     withCredentials:true,
-    transformRequest:[
-        (data:any)=>{
-            return qs.stringify(data)
-        }
-    ]
 })
-service.interceptors.request.use(
+serviceJson.interceptors.request.use(
     (config:AxiosRequestConfig)=>{
         Toast.loading({
             duration: 10000,
@@ -44,7 +39,7 @@ service.interceptors.request.use(
     }
 
 )
-service.interceptors.response.use(
+serviceJson.interceptors.response.use(
     (res:AxiosResponse)=>{
         Toast.clear()
         if(res.status === 200){
@@ -76,4 +71,4 @@ service.interceptors.response.use(
     }
 );
 
-export default service;
+export default serviceJson;

@@ -10,8 +10,10 @@ import echarts from 'echarts'
 declare module "vue/types/vue"{
   interface Vue{
     $https:any,
+    $httpsJson: any
     $toast:Toast,
-    $router: VueRouter
+    $router: VueRouter,
+    $mui: any
   }
 }
 declare global {

@@ -1,6 +1,6 @@
 <template>
-    <div class="goods" >
-       <div class="search" >
+    <div class="goods" ref="goods">
+       <div class="search" ref="search">
         <van-nav-bar :placeholder="true"   title="商品分类" />
            <van-search
                 v-model="searchValue"
@@ -9,21 +9,21 @@
                 show-action
             >
                 <template #action>
-                    <div>搜索</div>
+                    <div @click="search">搜索</div>
                 </template>
             </van-search>
         </div>
         <div class="goodsArea" >
-            <div class="slider" >
+            <div class="slider"  :style="{height: height+'px'}">
                 <div v-for="(item,index) in categoryList" :key="index" :class="{'active': active === index}"  :data-id="index" @click="changeCategory(item,index)">{{item.name}}</div>
             </div>
-            <div class="categoryArea" >
+            <div class="categoryArea" :style="{height: height+'px'}">
                 <div class="categoryTop">
                     <img :src="'http://www.topzh.net:16350/' + currentCategory.img" alt="">
                 </div>
                 <van-divider :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 10px' }">{{currentCategory.name}}</van-divider>
                 <div class="brandContent" v-if="brandList.length > 0"> 
-                    <div class="brandItem" v-for="(item,index) in brandList" :key="index">
+                    <div @click="toGoodList(item)" class="brandItem" v-for="(item,index) in brandList" :key="index">
                         <img :src="'http://www.topzh.net:16350/'+ item.img" alt="">
                         <p>{{item.name}}</p>
                     </div>
@@ -37,9 +37,8 @@
 declare function require(img: string): string
 import * as apiUrls from '../../utils/apiUrl'
 import { Component, Vue } from 'vue-property-decorator';
-import { NavBar,Search,Divider,Toast  } from 'vant';
+import { NavBar,Search,Divider} from 'vant';
 import * as utils from '../../utils/utils'
-import axios from 'axios'
 import noData from '../../components/common/noData.vue'
 @Component({
   components: {
@@ -58,14 +57,16 @@ export default class goods extends Vue {
     private brandList: object[] = []
     private contentHeight: number = 0
     private currentCategory: any = ""
-    mounted(){
+    private height: any = 0
+    mounted(){ 
+        this.$nextTick(()=>{
+            let ro = this.$route.query as any
+            let el = this.$refs as any
+            this.height = ro.height - el.search.offsetHeight
+        })
         this.identity = JSON.parse(localStorage.getItem("identity") as string);
         this.getCategoryList()
     }
-    created(){
-       
-    }
-   
     changeCategory(e:any,index:number){
         this.active = index
         this.currentCategory = this.categoryList[this.active]
@@ -86,22 +87,34 @@ export default class goods extends Vue {
         })
     }
     async getBrandList(){
-        Toast.loading({
-            duration: 10000,
-            loadingType: "circular"
-        })
         let data: object = {
             categoryId: this.categoryList[this.active].id,
             dealerId: this.identity.dealerId,
             retailerRelationId: this.identity.retailerRelationId
         }
-        await axios({
-            url: window.g.baseURL + apiUrls.brandList,
+        await this.$httpsJson({
+            url: apiUrls.brandList,
             method: "post",
             data:data
         }).then((res:any)=>{
-            Toast.clear()
-           this.brandList = res.data.data
+           this.brandList = res.data
+        })
+    }
+    toGoodList(item:any){
+        this.$router.push({
+            path: "/goodList",
+            query:{
+                brandId: item.id,
+                categoryId: this.categoryList[this.active].id
+            }
+        })
+    }
+    search(){
+        this.$router.push({
+            path: '/goodList',
+            query:{
+                goodsName: this.searchValue
+            }
         })
     }
 }
