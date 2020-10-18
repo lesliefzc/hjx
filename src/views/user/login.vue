@@ -15,17 +15,28 @@
   </div>
 </template>
 <script lang="ts">
+
 declare function require(img: string): string
 import * as apiUrls from '../../utils/apiUrl'
 import { Component, Vue } from 'vue-property-decorator';
 // import Vue from 'vue'
 import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
+Component.registerHooks([
+    'beforeRouteEnter'
+])
 @Component({
   components: {
   },
 })
 export default class Home extends Vue {
     // private username: string = ""
+    beforeRouteEnter(to:any, from:any, next:any){
+        if(!!localStorage.getItem("token")){
+            next('/index')
+        }else{
+            next()
+        }
+    }
     private userForm: any = {
         username: '',
         password: ''
