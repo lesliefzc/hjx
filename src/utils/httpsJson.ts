@@ -14,7 +14,7 @@ export interface ResopnseData {
 }
 let serviceJson: AxiosInstance | any;
 serviceJson = axios.create({
-    baseURL: 'http://www.topzh.net:16350',
+    baseURL: window.g.baseURL,
     timeout: 30000,
     headers:{
         'Content-Type': 'application/json'

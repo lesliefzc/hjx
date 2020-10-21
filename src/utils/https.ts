@@ -14,7 +14,7 @@ export interface ResopnseData {
 }
 let service: AxiosInstance | any;
 service = axios.create({
-    baseURL: 'http://www.topzh.net:16350',
+    baseURL: window.g.baseURL,
     timeout: 30000,
     headers:{
         'Content-Type': 'application/x-www-form-urlencoded'

@@ -1,6 +1,6 @@
 <template>
  <div class="goodList">
-    <div class="goodsItem" v-for="(item,index) in dataList" :key="index">
+    <div class="goodsItem" v-for="(item,index) in dataList" :key="index" @click="toGoodsDetail(item.batchId,item.goodsId)">
         <div class="imageArea">
             <img src="../../assets/images/swipe2.jpg" alt="">
         </div>
@@ -26,7 +26,15 @@ import { Component, Vue } from 'vue-property-decorator';
     }
 })
 export default class dailyData extends Vue {
-    
+    toGoodsDetail(batchId:any,goodsId: any){
+        this.$router.push({
+            path: '/goodDetails',
+            query:{
+                batchId: batchId,
+                goodsId: goodsId
+            }
+        })
+    }
 }
 </script>
 <style lang="scss" scoped>
@@ -40,6 +48,7 @@ export default class dailyData extends Vue {
         box-sizing: border-box;
         position: relative;
         justify-content: space-between;
+        overflow: hidden;
         img{
             display: block;
             position: relative;

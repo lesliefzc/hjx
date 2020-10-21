@@ -11,8 +11,10 @@ export  const ModifyRetailerList: string ="/api/index/select/modify"   //改变�
 export  const categoryList: string ="/api/goods/category"   //种类列表
 export  const brandList: string ="/api/goods/brand"   //品牌列表
 export  const goodsList: string ="/api/goods/goods/search"   //品牌列表
-
-
+export  const goodDetails: string ="/api/goods/goods/details"   //品牌列表
+export  const toCar: string ="/cart/addGoodsSku"   //添加到购物车
+export  const getCartList: string ="/cart/getCartList"   //添加到购物车
+export  const deleteSkus: string ="/cart/deleteSkus"   //添加到购物车
 
 
 

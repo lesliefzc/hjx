@@ -12,7 +12,7 @@
 .nodata{
     width: 100%;
     .content{
-        margin-top: 100px;
+        margin-top: 20%;
         &>img{
             margin: 10px auto;
             display: block;

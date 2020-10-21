@@ -60,7 +60,15 @@ const routes: Array<RouteConfig> = [
   {    
     path: '/goodList',
     name: 'goodList',
-    component: () => import('../views/good/goodList.vue')   //商品列表
+    component: () => import('../views/good/goodList.vue'), //商品列表
+    meta:{
+      keepAlive: true
+    }
+  },
+  {    
+    path: '/goodDetails',
+    name: 'goodDetails',
+    component: () => import('../views/good/goodDetails.vue')   //商品列表
   }
 ]
 

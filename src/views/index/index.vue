@@ -2,7 +2,7 @@
     <div class="indexClass">
       <van-nav-bar
         style=""
-        :left-text="'好经销-'+(userMsg.orgType===3?identity.dealerName:identity.retailerName)" 
+        :left-text="'好经销-'+(orgType===3?identity.dealerName:identity.retailerName)" 
         @click-left="selectDefault"
       />
       <div class="orderStatus">
@@ -130,8 +130,9 @@ export default class Index extends Vue {
   private newRecommendList: object[] = []    //新品推荐列表
   private orderRise: any = {}    //新品推荐列表
   private selectDefaultShow: boolean = false
-  private userMsg: object = {}
+  private userMsg: any = {}
   private retailerList: object[] = []
+  private orgType: number = 0
   created(){
     this.getDefault()
   }
@@ -142,6 +143,7 @@ export default class Index extends Vue {
         this.$store.dispatch("aSetUserMsg",localStorage.getItem("userMsg"));
       }
       this.userMsg = JSON.parse(this.$store.state.user.userMsg)
+      this.orgType = this.userMsg.orgType
       await this.$https({
         url: apiUrls.defaultDealer,
         method: "post"
@@ -169,12 +171,12 @@ export default class Index extends Vue {
       retailerRelationId: item.retailerRelationId,
       userId: item.userId,
     }
-    axios({
-      url: window.g.baseURL+apiUrls.ModifyRetailerList,
+    this.$httpsJson({
+      url: apiUrls.ModifyRetailerList,
       method: "post",
       data: data
     }).then((res:any)=>{
-      if(res.data.code === 200){
+      if(res.code === 200){
         this.selectDefaultShow = false;
         this.getDefault();
       }
@@ -189,15 +191,15 @@ export default class Index extends Vue {
       shippingroute: "",
       userId: this.identity.userId
     }
-    axios({
-      url: window.g.baseURL+apiUrls.selectRetailerList,
+    this.$httpsJson({
+      url: apiUrls.selectRetailerList,
       method: "post",
       data: data
     }).then((res:any)=>{
-      res.data.data.forEach((ele:any) => {
+      res.data.forEach((ele:any) => {
         ele.submitTime = ele.submitTime!==null?utils.timestampToTime(ele.submitTime,true):"";
       });
-      this.retailerList = res.data.data
+      this.retailerList = res.data
     })
   }
   async getDailyDataList(){    //获取每日/本周/本月的数据
@@ -337,6 +339,15 @@ export default class Index extends Vue {
         myChart.setOption(options);
       })  
   }
+    toGoodsDetail(goodsId:any,batchId: any){
+        this.$router.push({
+            path: 'goodDetails',
+            query:{
+                batchId: batchId,
+                goodsId: goodsId
+            }
+        })
+    }
 }
 </script>
 <style lang="scss" scoped>

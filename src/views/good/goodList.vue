@@ -4,7 +4,7 @@
             title="商品列表"
             ref="header"
             left-arrow
-            @click-left="onClickLeft"
+            @click-left="back"
         />
         <div class="searchArea"  ref="searchArea">
             <div class="searchInput">
@@ -109,6 +109,9 @@ import { NavBar,Search,Divider,Toast,DropdownMenu, DropdownItem,Field ,Cell ,Cel
 import * as utils from '../../utils/utils'
 import noData from '../../components/common/noData.vue'
 import back from '../../mixin/back'
+Component.registerHooks([
+    'beforeRouteLeave'
+])
 @Component({
   components: {
     [NavBar.name]: NavBar,
@@ -127,6 +130,13 @@ import back from '../../mixin/back'
 
 })
 export default class goodList extends back{
+    beforeRouteLeave(to:any,from:any,next:any){
+        if(to.path === '/goods' || to.path === '/car'){
+            this.removeCache(); 
+        }
+        // this.scrollTop = this.$refs.box.scrollTop
+        next()
+    }
     private loading: boolean = false;    //分页插件参数  loading 控制加载
     private finished: boolean = false;   //分页插件参数 为true代表加载完成不再触发函数
     private pageSize:number = 10     //每次请求页面的大小
@@ -180,7 +190,23 @@ export default class goodList extends back{
         
         this.getGoodsList(false);
     }
-
+    removeCache(){
+      let vnode = this.$vnode as any
+      if(vnode &&vnode.data.keepAlive&&vnode.parent){
+        const tag = vnode.tag;
+        let caches = vnode.parent.componentInstance.cache;
+        let keys = vnode.parent.componentInstance.keys;
+        for(let [key,cache] of  Object.entries(caches)){
+          if((cache as any).tag === tag){
+            if(keys.length>0&&keys.includes(key)){
+              keys.splice(keys.indexOf(key),1);
+              delete caches[key]
+            }
+          }
+        }
+      }
+      // this.$destroy();
+    }
     async getGoodsList(isCondition:boolean){   //获取商品列表
         if(isCondition){   //控制是否为条件搜索而非加载下一页触发的操作，条件搜索则需把当前页面初始化，加载下一页则不需要
             this.pageNo = 1;
@@ -334,11 +360,23 @@ export default class goodList extends back{
     openMenu(){ 
         this.getCategoryList()
     }
-    toGoodsDetail(){
-
+    toGoodsDetail(goodsId:any,batchId: any){
+        this.$router.push({
+            path: '/goodDetails',
+            query:{
+                batchId: batchId,
+                goodsId: goodsId
+            }
+        })
     }
-    onClickLeft(){
-       this.back()  //mixins混入的参数，返回
+    back(){
+        this.$router.push({
+            path: '/goods',
+            query:{
+                active: this.$route.query.active,
+                height: this.$route.query.height
+            }
+        })
     }
 }
 </script>

@@ -65,6 +65,9 @@ export default class goods extends Vue {
             this.height = ro.height - el.search.offsetHeight
         })
         this.identity = JSON.parse(localStorage.getItem("identity") as string);
+        if(!!this.$route.query.active){
+            this.active =  Number(this.$route.query.active)
+        }
         this.getCategoryList()
     }
     changeCategory(e:any,index:number){
@@ -105,7 +108,9 @@ export default class goods extends Vue {
             path: "/goodList",
             query:{
                 brandId: item.id,
-                categoryId: this.categoryList[this.active].id
+                categoryId: this.categoryList[this.active].id,
+                active: this.active as any,
+                height: this.$route.query.height
             }
         })
     }
@@ -113,7 +118,9 @@ export default class goods extends Vue {
         this.$router.push({
             path: '/goodList',
             query:{
-                goodsName: this.searchValue
+                goodsName: this.searchValue,
+                height: this.$route.query.height,
+                active: this.active as any
             }
         })
     }
