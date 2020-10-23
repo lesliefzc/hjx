@@ -24,6 +24,7 @@ import {Tabbar,TabbarItem} from 'vant'
     [TabbarItem.name]: TabbarItem
   },
 })
+
 export default class Home extends Vue {
    private active: number = 0
    private authorityKeyList:any[] = []

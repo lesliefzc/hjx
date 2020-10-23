@@ -5,4 +5,26 @@
 }
 .van-dialog__message{
     font-size: 16px!important;
+    padding: 0.5rem!important;
 }
+.van-dialog{
+    width: 8rem !important;
+    padding: 5px !important;
+}
+.van-dialog__footer{
+    height: 1.3rem!important; 
+   
+}
+.van-dialog__content--isolated{
+    min-height: 2rem !important;
+}
+.van-dialog__content{
+    min-height: 1.3rem !important;
+}
+.van-dialog__cancel, .van-dialog__confirm {
+    height: 1.5rem!important;
+    font-size: 15 !important;
+}
+.van-cell {
+    font-size: 15px !important;
+}   

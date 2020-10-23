@@ -1,9 +1,9 @@
 <template>
-    <div class="car">
-        <van-nav-bar  class="header" title="购物车" />
+    <div class="car" ref="car">
+        <van-nav-bar left-text="快速下单" @click-left="quickOrder" class="header" title="购物车" ref="header" />
             <div class="panel-box" >
-                <div class="cart-list"  v-show="cartList.length">
-                    <div class="cart-list-item" v-for="item in cartList" :key="item.batchid">
+                <div class="cart-list" :style="{height: height+'px'}"  v-show="cartList.goodsList.length>0">
+                    <div class="cart-list-item" v-for="item in cartList.goodsList" :key="item.batchid">
                     <div v-if="item.hasActivity">
                         <van-notice-bar
                         v-for="(activity,index) in item.activityInfos"
@@ -25,7 +25,7 @@
                     <van-card :title="item.name" class="cart-item" style="padding-left:5px;" @click="toGoodsDetail(item.id,item.batchid)">
                         <van-row type="flex" slot="thumb">
                         <van-col class="check-box-col" span="9">
-                            <van-checkbox v-if="item.status!=0" @click="itemChange(item)"  v-model="item.checked" checked-color="red"></van-checkbox>
+                            <van-checkbox v-if="item.status!=0" @click.native.stop="itemChange(item)"  v-model="item.checked" checked-color="red"></van-checkbox>
                             <span v-else style="margin-right: 2px;">已失效</span>
                         </van-col>
 
@@ -37,10 +37,10 @@
                         <div slot="num" class="stepper" @click.stop>
                         <van-stepper
                             :name="item.batchid"
-                            @focus="onFocus(item)"
                             :disabled="onChangeflag"
                             v-model.number="item.number"
                             integer
+                            @focus ="onFocus(...arguments,item)"
                             @change="onChange"
                         />
                         <span class="board" @click="openCartNumberKeyBoard(item)"></span>
@@ -80,21 +80,33 @@
                         </div>
                     </div>
                 </div>
+
             </div>
-            <div v-show="!cartList.length" class="nodata-text">您的购物车暂时没有商品!</div>
+            <div v-show="cartList.goodsList.length===0" :style="{height: height+'px'}"  class="nodata-text">您的购物车暂时没有商品!</div>
         </div>
         <van-dialog v-model="show" show-cancel-button style="padding: 10px;" @confirm="inputNumConfirm" @cancel="show=false;num=1" >
-            <van-field label="请输入数量：" type="digit"  v-model="num"/>
+            <van-field ref="num" label="请输入数量：" type="digit"  v-model="num"/>
         </van-dialog>
+        <van-popup v-model="quickShow" position="bottom" style="height:90%;" @close="getCarList">
+          <quickOrder :identity ="identity" :priceType="priceType" ref="quickOrderRef"></quickOrder>
+        </van-popup>
+        <div ref="submitBar" class="submitBar" >
+            <van-checkbox @click="allChecked" v-model="checked" checked-color="red">全选</van-checkbox>
+            <div class="allPrice" style="width:50%;text-align:center;" v-if="priceType!==2">
+                合计：<span style="color:red;font-size:0.5rem;">¥ </span><span>{{priceType===1||priceType===3?(cartList.amountAll?(cartList.amountAll/100).toFixed(2):0):(cartList.retailamountAll?(cartList.retailamountAll/100).toFixed(2):0)}}</span>
+            </div>
+            <div @click="onSubmit" class="submitBtn">提交订单</div>
+        </div>
     </div>
 </template>
 <script lang="ts">
 declare function require(img: string): string
 import * as apiUrls from '../../utils/apiUrl'
-import { Component, Vue } from 'vue-property-decorator';
-import { NavBar ,Card ,Col,Row ,Icon,Stepper,Checkbox,NoticeBar,Dialog,Field} from 'vant';
+import { Component, Vue,Watch } from 'vue-property-decorator';
+import { NavBar ,Card ,Col,Row ,Icon,Stepper,Checkbox,NoticeBar,Dialog,Field ,Popup,Search } from 'vant';
 import * as utils from '../../utils/utils'
 import back from '../../mixin/back'
+import quickOrder from '../../components/car/quickOrder.vue'
 @Component({
   components: {
     [NavBar.name]: NavBar,
@@ -106,19 +118,35 @@ import back from '../../mixin/back'
     [Checkbox.name]: Checkbox,
     [NoticeBar.name]: NoticeBar,
     [Field.name]: Field,
-    "van-dialog": Dialog.Component
+    [Popup.name]: Popup,
+    [Search.name]: Search,
+    "van-dialog": Dialog.Component,
+    "quickOrder": quickOrder
   },
 })
 export default class goodDetails extends back {
     private identity:any = {}
     private priceType: any = 0
-    private cartList: any[] = []
+    private cartList: any = {
+        goodsList: []
+    }
     private onChangeflag: boolean = false
     private currentTime: any = 0
     private show: boolean = false
     private num: number = 1
     private chosedItem: any
+    private height:any = 0
+    private checked: boolean = false
+    private quickShow: boolean = false
+    
     mounted(){
+        this.$nextTick(()=>{
+            let el = this.$refs as any;
+            this.height = document.documentElement.offsetHeight - 50 - el.header.$el.offsetHeight - el.submitBar.offsetHeight
+        })
+        
+    }
+    created(){
         this.identity = JSON.parse(localStorage.getItem("identity") as string);
         this.priceType = this.identity.priceType
         this.getCarList()
@@ -134,7 +162,11 @@ export default class goodDetails extends back {
             method:"post",
             data
         }).then((res:any)=>{
-             res.data.goodsList.forEach((item:any) => {
+            this.checked = true
+            res.data.goodsList.forEach((item:any) => {
+                if(item.checkStatus === 2){
+                    this.checked = false
+                }
                 if (item.activityInfos && item.activityInfos.length > 0) {
                     item.hasActivity = true;
                 } else {
@@ -147,8 +179,7 @@ export default class goodDetails extends back {
                 }
 
             });
-            this.cartList = res.data.goodsList
-            
+            this.cartList = res.data
         })
     }
     deleteGoods(item:any){
@@ -169,17 +200,31 @@ export default class goodDetails extends back {
         }).catch(cancel=>{
             console.log(cancel)
         })
-        
     }
-    itemChange(item:any) {
-      
+    async itemChange(item:any) {
+      let data = {
+        batchid: item.batchid,
+        checkStatus: !item.checked?1:2,
+        id: item.id
+      }
+      await this.$httpsJson({
+          url: apiUrls.updateGoodsSkusCheckStatus,
+          method: "post",
+          data: [data],
+      }).then((res:any)=>{
+          if(res.code === 200){
+              this.getCarList()
+          }
+      })
     }
     openCartNumberKeyBoard(){
 
     }
-    onFocus(event:any) {
-        this.chosedItem = event
+    onFocus(event:any,item:any) {
+        event.target.blur()
+        this.chosedItem = item
         this.show = true
+       
     }
     inputNumConfirm(){
         if(this.num<1){
@@ -193,11 +238,31 @@ export default class goodDetails extends back {
         this.onChange(this.num,data)
         this.num = 1
     }
+    allChecked(){
+        let data:any = []
+        this.cartList.goodsList.forEach((ele:any) => {
+            let ob = {
+                batchid: ele.batchid,
+                checkStatus: this.checked?1:2,
+                id: ele.id
+            } 
+            data.push(ob)           
+        });
+        this.$httpsJson({
+            url: apiUrls.updateGoodsSkusCheckStatus,
+            method: "post",
+            data: data,
+        }).then((res:any)=>{
+            if(res.code === 200){
+                this.getCarList()
+            }
+        })
+    }
     async onChange(value:any, detail:any) {
         if (this.onChangeflag) return;
         this.onChangeflag = true;
         let id = detail.name;
-        let item = this.cartList.find(goods => {
+        let item = this.cartList.goodsList.find((goods:any) => {
             return goods.batchid == id;
         });
         let originNumber = item.originNumber;
@@ -231,6 +296,19 @@ export default class goodDetails extends back {
             }
         })
     }
+    onSubmit(){
+        this.$router.push({
+            path: '/submitOrder'
+        })
+    }
+    quickOrder(){
+        this.quickShow = true
+        this.$nextTick(()=>{
+            let el = this.$refs as any
+            el.quickOrderRef.onSearch()
+        })
+      
+    }
 }
 </script>
 <style lang="scss">
@@ -238,10 +316,32 @@ export default class goodDetails extends back {
     width: 100%;
     height: 100%;
     position: relative;
-    
     .header{
         position: sticky;
         top: 0;
+    }
+    .submitBar{
+        height: 45px;
+        display: flex;
+        border: 1px solid #eee;
+        box-sizing: border-box;
+        padding: 0 5px;
+        line-height: 45px;
+        justify-content: space-evenly;
+        .allPrice>span{
+            color: red;
+            font-size: 22px;
+        }
+        .submitBtn{
+            width: 100px;
+            height: 40px;
+            background: linear-gradient(90deg,#ff6034,#ee0a24);
+            color: #fff;
+            text-align: center;
+            line-height: 40px;
+            border-radius: 20px;
+            
+        }
     }
     .panel-box {
     .nodata-text {

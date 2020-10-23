@@ -46,7 +46,7 @@ const routes: Array<RouteConfig> = [
         path: '/templateOrder',
         name: 'templateOrder',
         component: () => import('../views/index/templateOrder.vue'),
-      },
+      }
     ]
   },
   {
@@ -69,7 +69,17 @@ const routes: Array<RouteConfig> = [
     path: '/goodDetails',
     name: 'goodDetails',
     component: () => import('../views/good/goodDetails.vue')   //商品列表
-  }
+  },
+  {
+    path: '/addressList',
+    name: 'addressList',
+    component: () => import('../views/mine/addressList.vue')
+  },
+  {
+    path: '/submitOrder',
+    name: 'submitOrder',
+    component: () => import('../views/submitOrder/submitOrder.vue')
+  },
 ]
 
 const router = new VueRouter({
